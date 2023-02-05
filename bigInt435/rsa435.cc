@@ -1,5 +1,6 @@
 // Standard libraries
 #include <string>
+#include <fstream>
 #include <iostream>
 #include <stdlib.h> 
 #include <time.h>
@@ -27,10 +28,11 @@ int main()
    bool check2 = false;
 
 	try 
-   {   
+   {  
       /* FINDING p */
-      std::cout << "Finding p...\n";
+      std::cout << "finding p...\n";
       BigUnsigned p = BigUnsigned(0);
+      int primeCandidate = 0;
      
       do
       {
@@ -48,23 +50,27 @@ int main()
          }
          p = (p * 10) + 7; // concatenating a 7 to increase odds that this number is prime
 
+         ++primeCandidate;
+         if (primeCandidate % 10 == 0)
+         {
+            std::cout << "p candidate number " << primeCandidate << std::endl;
+         }
+
          // send this candidate off to be tested for primeness (twice to be extra sure)
          check1 = primality(p);
-         std::cout << check1 << std::endl;
-
+         
          if(check1)
          {
-            std::cout << "check 2 runs\n";
             check2 = primality(p);
          }
       } while (!check1 || !check2); // while either call to primality returns false
       
-      std::cout << "my p !!!\n";
-      std::cout << p << std::endl;
+      std::cout << "success on candidate " << primeCandidate << "!!\n\n";
 
       /* FINDING q */
-      std::cout << "Finding q...\n";
+      std::cout << "finding q...\n";
       BigUnsigned q = BigUnsigned(0);
+      primeCandidate = 0;
      
       do
       {
@@ -82,19 +88,39 @@ int main()
          }
          q = (q * 10) + 7; // concatenating a 7 to increase odds that this number is prime
 
+         ++primeCandidate;
+         if (primeCandidate % 10 == 0)
+         {
+            std::cout << "q candidate number " << primeCandidate << std::endl;
+         }
+
          // send this candidate off to be tested for primeness (twice to be extra sure)
          check1 = primality(q);
-         std::cout << check1 << std::endl;
 
          if(check1)
          {
-            std::cout << "check 2 runs\n";
             check2 = primality(q);
          }
       } while (!check1 || !check2); // while either call to primality returns false
       
-      std::cout << "my q !!!\n";
-      std::cout << q << std::endl;
+      std::cout << "success on candidate " << primeCandidate << "!!\n\n";
+      
+      /* file stream for writing p and q */
+      std::ofstream outFile("p_q.txt");
+      
+      if (!outFile)
+      {
+         std::cerr << "Error connecting to file for streaming of p and q, displaying to console instead\n";
+
+         std::cout << "p: " << p << "\nq: " << q << std::endl;
+      }
+
+      else 
+      {
+         std::cout << "results for p and q written to \"p_q.txt\"\n";
+         
+         outFile << p << std::endl << q << std::endl;
+      }
 	} 
    
    catch(char const* err) 
