@@ -7,9 +7,9 @@
 
 // 'BigIntegerLibrary.hh' includes all of the library headers.
 #include "BigIntegerLibrary.hh"
+#include "BigIntegerAlgorithms.hh"
 
 bool primality(const BigUnsigned &n);
-BigUnsigned modExp(const BigUnsigned &x, const BigUnsigned &y, const BigUnsigned &m);
 
 // number of times looped to produce p and q
 const int LOOP_COUNT = 200;
@@ -29,7 +29,7 @@ int main()
 
 	try 
    {  
-      /* FINDING p */
+      /* finding p */
       std::cout << "finding p...\n";
       BigUnsigned p = BigUnsigned(0);
       int primeCandidate = 0;
@@ -67,7 +67,7 @@ int main()
       
       std::cout << "success on candidate " << primeCandidate << "!!\n\n";
 
-      /* FINDING q */
+      /* finding q */
       std::cout << "finding q...\n";
       BigUnsigned q = BigUnsigned(0);
       primeCandidate = 0;
@@ -121,10 +121,48 @@ int main()
          
          outFile << p << std::endl << q << std::endl;
       }
+
+      // now that p and q have been discovered, we can store n
+      BigInteger n = p * q;
+
+      /* computing e and d */
+
+      // choose an initial candidate for e to be relatively prime to (p - 1)(q - 1)
+      BigInteger e = BigInteger(1);
+
+      // compute phi 
+      BigInteger phi = (p - 1) * (q - 1);
+
+      BigUnsigned GCD;
+      
+      do 
+      {
+         e += 2;
+         GCD = gcd(phi.getMagnitude(), e.getMagnitude());   
+      } while (GCD != 1);
+
+      BigUnsigned d = modinv(e, phi.getMagnitude());
+
+      /* check that e and d are modular inverses */
+      BigInteger base = BigInteger(1);
+
+      // encrypt with e
+      base = modexp(1, e.getMagnitude(), phi.getMagnitude());
+
+      // decript with d
+      base = modexp(base, d, phi.getMagnitude());
+      
+      // base should return to its intial state
+      if (base != 1)
+      {
+         std::cerr << "e and d broke a test that concluded they aren't modular inverses\n";
+
+         exit(1);
+      }
 	} 
    
    catch(char const* err) 
-   {
+   { 
 		std::cout << "The library threw an exception:\n"
 			       << err << std::endl;
 	}
@@ -132,10 +170,8 @@ int main()
 	return 0;
 }
 
-/*
-   pre: positive (large) integer n
-   post: returns true if prime, and false otherwise 
-*/
+// Input: Positive integer n
+// Output: is prime? (yes/no)
 bool primality(const BigUnsigned &n)
 {
    // Fermat's Little Theorem states: 
@@ -147,7 +183,7 @@ bool primality(const BigUnsigned &n)
    // this ensures a is never greater than n because n was concatenated with 7 following its loop
    const int LOOP_COUNT_RAND = rand() % (LOOP_COUNT) + 1;
    
-   BigUnsigned a = BigUnsigned(0);
+   BigInteger a = BigInteger(0);
    for (int i = 0; i < LOOP_COUNT_RAND; ++i) 
    {
       a = (a * 10) + (rand() % 10);
@@ -166,7 +202,7 @@ bool primality(const BigUnsigned &n)
    }
 
    // with this valid number for a, run test for a^(n-1) == 1 mod n
-   if (modExp(a, n - 1, n) == BigUnsigned(1) % n)
+   if (modexp(a, n - 1, n) == BigUnsigned(1) % n)
    {
       // passes FLT, is *very* likely prime
       return true;
@@ -175,28 +211,5 @@ bool primality(const BigUnsigned &n)
    {
       // not prime 
       return false;
-   }
-}
-
-/*
-   pre: receive three BigUnsigned for x^y mod m
-   post: modular exponention used to recursively return the result of exponentiation for very large ints  
-*/
-BigUnsigned modExp(const BigUnsigned &x, const BigUnsigned &y, const BigUnsigned &m)
-{
-   if (y == 0)
-   {
-      return 1;
-   }
-   
-   BigUnsigned z = modExp(x, y / 2, m);
-   
-   if (y % 2 == 0)
-   {
-      return (z * z) % m;
-   }
-   else 
-   {
-      return (x * z * z) % m;
    }
 }
