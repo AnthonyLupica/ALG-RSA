@@ -9,7 +9,7 @@
 #include "BigIntegerLibrary.hh"
 #include "BigIntegerAlgorithms.hh"
 
-bool primality(const BigUnsigned &n);
+bool primality(const BigInteger &n);
 
 // number of times looped to produce p and q
 const int LOOP_COUNT = 200;
@@ -31,7 +31,7 @@ int main()
    {  
       /* finding p */
       std::cout << "finding p...\n";
-      BigUnsigned p = BigUnsigned(0);
+      BigInteger p = BigInteger(0);
       int primeCandidate = 0;
      
       do
@@ -69,7 +69,7 @@ int main()
 
       /* finding q */
       std::cout << "finding q...\n";
-      BigUnsigned q = BigUnsigned(0);
+      BigInteger q = BigInteger(0);
       primeCandidate = 0;
      
       do
@@ -106,9 +106,9 @@ int main()
       std::cout << "success on candidate " << primeCandidate << "!!\n\n";
       
       /* file stream for writing p and q */
-      std::ofstream outFile("p_q.txt");
+      std::ofstream out_p_q("p_q.txt");
       
-      if (!outFile)
+      if (!out_p_q)
       {
          std::cerr << "Error connecting to file for streaming of p and q, displaying to console instead\n";
 
@@ -119,7 +119,7 @@ int main()
       {
          std::cout << "results for p and q written to \"p_q.txt\"\n";
          
-         outFile << p << std::endl << q << std::endl;
+         out_p_q << p << std::endl << q << std::endl;
       }
 
       // now that p and q have been discovered, we can store n
@@ -141,28 +141,54 @@ int main()
          GCD = gcd(phi.getMagnitude(), e.getMagnitude());   
       } while (GCD != 1);
 
-      BigUnsigned d = modinv(e, phi.getMagnitude());
+      // assign d a value with the valid e
+      BigInteger d(modinv(e, phi.getMagnitude()));
 
       /* check that e and d are modular inverses */
       BigInteger base = BigInteger(1);
 
       // encrypt with e
       base = modexp(1, e.getMagnitude(), phi.getMagnitude());
-
       // decript with d
-      base = modexp(base, d, phi.getMagnitude());
+      base = modexp(base, d.getMagnitude(), phi.getMagnitude());
       
-      // base should return to its intial state
+      // base should return to its initial state
       if (base != 1)
       {
          std::cerr << "e and d broke a test that concluded they aren't modular inverses\n";
 
          exit(1);
       }
+
+      /* file stream for writing e and d in public and private keys*/
+
+      // connect to file for public key
+      std::ofstream outPubKey("e_n.txt");
+      std::ofstream outPrivKey("d_n.txt");
+      
+      if (!outPubKey || !outPrivKey)
+      {
+         std::cerr << "\nError connecting to file for streaming of keys, displaying to console instead\n";
+
+         std::cout << "public key -\n" << "e: " << e << "\nn: " << n << std::endl;
+         std::cout << "\nprivate key -\n" << "d: " << d << "\nn: " << n << std::endl;
+
+         return 0;
+      }
+
+      outPubKey << e << std::endl 
+                << n << std::endl;
+      outPubKey.close();
+   
+      outPrivKey << d << std::endl 
+                 << n << std::endl;
+      outPrivKey.close();
+
+      std::cout << "public and private key written to written \"e_n.txt\" and \"d_n.txt\" respectively\n";
 	} 
    
    catch(char const* err) 
-   { 
+   {  
 		std::cout << "The library threw an exception:\n"
 			       << err << std::endl;
 	}
@@ -172,7 +198,7 @@ int main()
 
 // Input: Positive integer n
 // Output: is prime? (yes/no)
-bool primality(const BigUnsigned &n)
+bool primality(const BigInteger &n)
 {
    // Fermat's Little Theorem states: 
    // "if n is prime, then for all a, such that 1 <= a < n, a^(n-1) == 1 mod n"
@@ -202,7 +228,7 @@ bool primality(const BigUnsigned &n)
    }
 
    // with this valid number for a, run test for a^(n-1) == 1 mod n
-   if (modexp(a, n - 1, n) == BigUnsigned(1) % n)
+   if (modexp(a, (n - 1).getMagnitude(), n.getMagnitude()) == 1)
    {
       // passes FLT, is *very* likely prime
       return true;
