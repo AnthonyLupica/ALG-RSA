@@ -5,6 +5,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include "sha256.h"
 #include "BigIntegerLibrary.hh"
 
@@ -34,23 +35,35 @@ int main(int argc, char *argv[])
       // read the file
       std::streampos begin,end;
       std::ifstream myfile (filename.c_str(), std::ios::binary);
+
+      // verify connection to file
+      if (!myfile)
+      {
+         std::cerr << "\nError connecting to file... check that the \"file to sign\" argument is correct and ensure it is present at the same directory level as messageDigest435.cpp\n";
+         exit(1);
+      }
+
+      // find size of the file in bytes
       begin = myfile.tellg();
       myfile.seekg (0, std::ios::end);
       end = myfile.tellg();
-      std::streampos size = end-begin;
-      std::cout << "size of the file: " << size << " bytes.\n"; // size of the file
+      std::streampos size = end-begin; 
       
+      // read file; save in the char array memblock
       myfile.seekg (0, std::ios::beg);
       char * memblock = new char[size];
-      myfile.read (memblock, size); // read file; it's saved in the char array memblock
+      myfile.read (memblock, size); 
       myfile.close();
       
-      std::string copyOFfile = filename+".Copy"; 
-      std::ofstream myfile2 (copyOFfile.c_str(), std::ios::binary);
-      myfile2.write (memblock, size); // write to a file
-      myfile2.close();
+      // std::string copyOFfile = filename+".Copy"; 
+      // std::ofstream myfile2 (copyOFfile.c_str(), std::ios::binary);
+      // myfile2.write (memblock, size); // write to a file
+      // myfile2.close();
       
-      std::cout<<memblock;
+      std::cout << "file to sign/verify >>\n\n```\n" << memblock << "\n```\n\n";
+      
+      std::cout << "file name: \"" << filename.c_str() << "\"\n" ;
+      std::cout << "size of the file: " << size << " bytes.\n";
         
       if (argv[1][0]=='s') {
          std::cout << "\n"<<"Need to sign the doc.\n";
