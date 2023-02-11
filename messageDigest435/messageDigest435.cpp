@@ -5,28 +5,28 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include "sha256.h"
 #include "BigIntegerLibrary.hh"
 
 int main(int argc, char *argv[])
 {
-   //demonstrating how sha256 works
-   std::string input = "testing";
-   std::string output1 = sha256(input);
-   std::cout << "sha256('" << input << "'):" << output1 << "\n";
+   // //demonstrating how sha256 works
+   // std::string input = "testing";
+   // std::string output1 = sha256(input);
+   // std::cout << "sha256('" << input << "'):" << output1 << "\n";
    
-   //demo bigInt works here
-   BigUnsigned a = stringToBigUnsigned("124338907642982722929222542626327282");
-   BigUnsigned b = stringToBigUnsigned("124338907642977775546469426263278643");
-   std::cout << "big a = " << a << "\n";
-   std::cout << "big b = " << b << "\n";
-   std::cout << "big a*b = " << a * b << "\n";
+   // //demo bigInt works here
+   // BigUnsigned a = stringToBigUnsigned("124338907642982722929222542626327282");
+   // BigUnsigned b = stringToBigUnsigned("124338907642977775546469426263278643");
+   // std::cout << "big a = " << a << "\n";
+   // std::cout << "big b = " << b << "\n";
+   // std::cout << "big a*b = " << a * b << "\n";
 
-   //Second part of your project starts here
+   // Second part of your project starts here
    if (argc != 3 || (argv[1][0] != 's' && argv[1][0] != 'v')) 
    {
-      std::cout << "wrong format! should be \"a.exe s filename\"";
+      std::cerr << "wrong format! should be \"./messageDigest435 [s(sign) or v(verify)] [filename]\"\n";
+      exit(1);
    }
    else 
    {
@@ -55,25 +55,81 @@ int main(int argc, char *argv[])
       myfile.read (memblock, size); 
       myfile.close();
       
+      // // write a copy of the file
       // std::string copyOFfile = filename+".Copy"; 
       // std::ofstream myfile2 (copyOFfile.c_str(), std::ios::binary);
-      // myfile2.write (memblock, size); // write to a file
+      // myfile2.write (memblock, size); 
       // myfile2.close();
       
-      std::cout << "file to sign/verify >>\n\n```\n" << memblock << "\n```\n\n";
+      if (argv[1][0]=='s')
+      {
+         std::cout << "file to sign >>\n\n```\n" << memblock << "\n```\n";
+      }
+      else
+      {
+         std::cout << "file to verify >>\n\n```\n" << memblock << "\n```\n";
+      }
       
       std::cout << "file name: \"" << filename.c_str() << "\"\n" ;
-      std::cout << "size of the file: " << size << " bytes.\n";
-        
-      if (argv[1][0]=='s') {
-         std::cout << "\n"<<"Need to sign the doc.\n";
-         //.....
+      std::cout << "size of the file: " << size << " bytes.\n\n";
+
+      // filestream object for reading public/private key 
+      std::ifstream public_private_in;
+
+      // BigInteger to store n from public and private keys 
+      BigInteger n = BigInteger(0);
+
+      // temp variables for reading in values as strings 
+      std::string temp_value1;
+      std::string temp_value2;
+      
+      // document signing 
+      if (argv[1][0]=='s') 
+      {
+         public_private_in.open("../bigInt435/d_n.txt");
+
+         if (!public_private_in)
+         {
+            std::cerr << "Error connecting to file containing private key for document signing...\n"
+                      << "Make sure it is reachable through \"../bigInt435/d_n.txt\"\n";
+            exit(1);
+         }
+
+         BigInteger d = BigInteger(0);
          
+         // read d into value 1 and n into value 2
+         public_private_in >> temp_value1 >> temp_value2;
+
+         // convert strings to BigIntegers
+         d = stringToBigInteger(temp_value1);
+         n = stringToBigInteger(temp_value2);
+
+
+         public_private_in.close();
       }
-      else {
-         std::cout << "\n"<<"Need to verify the doc.\n";
-         //.....
-         
+
+      // document verifying 
+      else 
+      {
+         public_private_in.open("../bigInt435/e_n.txt");
+
+         if (!public_private_in)
+         {
+            std::cerr << "Error connecting to file containing public key for document verification...\n"
+                      << "Make sure it is reachable through \"../bigInt435/e_n.txt\"\n";
+            exit(1);
+         }
+
+         BigInteger e = BigInteger(0);
+
+         // read e into value 1 and n into value 2
+         public_private_in >> temp_value1 >> temp_value2;
+
+         // convert strings to BigIntegers
+         e = stringToBigInteger(temp_value1);
+         n = stringToBigInteger(temp_value2);
+
+         public_private_in.close();
       }
       delete[] memblock;
     }
