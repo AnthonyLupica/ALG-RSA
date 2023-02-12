@@ -9,19 +9,25 @@ are adjacent directories.
 
 execution:
 
-part 1 :: producing the public and private keys ---> ./rsa435
-          
-          - private key written to 'd_n.txt', and public key written to 'e_n.txt', both within the bigInt435 directory
+part 1 :: rsa 
+```
+make all
+
+public and private keys     ---> ./rsa435
+```          
+- private key written to 'd_n.txt', and public key written to 'e_n.txt', both within the bigInt435 directory
 
 part 2 :: digital signatures
+```
+make all
 
 to sign a document          ---> ./messageDigest435 [s] [file_name]
 
 to verify a signed document ---> ./messageDigest435 [v] [file_name] [signature_file]
-           
-          - assumption for s and v is that the private/public key can be found one adjecent directory over in bigInt435 and are appropriately named
-          - similarly, it is assumed that the document.txt to be signed is within the messageDigest435 directory containing messageDigest435.cpp.
-            The signature document will also be ouptut here
+```           
+- assumption for s and v is that the private/public key can be found one adjecent directory over in bigInt435 and are appropriately named
+- similarly, it is assumed that the document.txt to be signed is within the messageDigest435 directory containing messageDigest435.cpp.
+  The signature document will also be ouptut here
             
            
            
