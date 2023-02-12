@@ -21,6 +21,7 @@ int main()
 	 * Your C++ compiler might need a command-line option to compile
 	 * code that uses exceptions. */
 
+   // seed rand
    srand(time(0));
 
    // booleans for the two required primality tests
@@ -29,7 +30,7 @@ int main()
 
 	try 
    {  
-      /* finding p */
+      // [F][I][N][D][I][N][G] [P]
       std::cout << "finding p...\n";
       BigInteger p = BigInteger(0);
       int primeCandidate = 0;
@@ -50,6 +51,7 @@ int main()
          }
          p = (p * 10) + 7; // concatenating a 7 to increase odds that this number is prime
 
+         // display to the console every candidate number that is a multiple of 10
          ++primeCandidate;
          if (primeCandidate % 10 == 0)
          {
@@ -67,7 +69,7 @@ int main()
       
       std::cout << "success on candidate " << primeCandidate << "!!\n\n";
 
-      /* finding q */
+      // [F][I][N][D][I][N][G] [Q]
       std::cout << "finding q...\n";
       BigInteger q = BigInteger(0);
       primeCandidate = 0;
@@ -88,6 +90,7 @@ int main()
          }
          q = (q * 10) + 7; // concatenating a 7 to increase odds that this number is prime
 
+         // display to the console every candidate number that is a multiple of 10
          ++primeCandidate;
          if (primeCandidate % 10 == 0)
          {
@@ -105,7 +108,7 @@ int main()
       
       std::cout << "success on candidate " << primeCandidate << "!!\n\n";
       
-      /* file stream for writing p and q */
+      // [S][T][R][E][A][M][I][N][G] [P] [A][N][D] [Q]
       std::ofstream out_p_q("p_q.txt");
       
       if (!out_p_q)
@@ -122,35 +125,28 @@ int main()
          out_p_q << p << std::endl << q << std::endl;
       }
 
-      // now that p and q have been discovered, we can store n
-      BigInteger n = p * q;
+      // [N], [P][H][I], [E], [A][N][D] [D]
 
-      /* computing e and d */
+      BigInteger n = p * q;                // compute n
+      BigInteger phi = (p - 1) * (q - 1);  // compute phi
 
-      // choose an initial candidate for e to be relatively prime to (p - 1)(q - 1)
+      // choose an initial candidate for e that is relatively prime to (p - 1)(q - 1)
       BigInteger e = BigInteger(1);
 
-      // compute phi 
-      BigInteger phi = (p - 1) * (q - 1);
-
       BigUnsigned GCD;
-      
       do 
       {
          e += 2;
          GCD = gcd(phi.getMagnitude(), e.getMagnitude());   
-      } while (GCD != 1);
+      } while (GCD != 1); // outside this do-while, an e has been found which is relatively prime to phi
 
-      // assign d a value with the valid e
+      // assign d a value using e
       BigInteger d(modinv(e, phi.getMagnitude()));
 
       /* check that e and d are modular inverses */
-      BigInteger base = BigInteger(1);
-
-      // encrypt with e
-      base = modexp(1, e.getMagnitude(), phi.getMagnitude());
-      // decript with d
-      base = modexp(base, d.getMagnitude(), phi.getMagnitude());
+      BigInteger base = BigInteger(1);                           // a base value 
+      base = modexp(1, e.getMagnitude(), phi.getMagnitude());    // encrypt with e
+      base = modexp(base, d.getMagnitude(), phi.getMagnitude()); // decript with d
       
       // base should return to its initial state
       if (base != 1)
@@ -160,12 +156,13 @@ int main()
          exit(1);
       }
 
-      /* file stream for writing e and d in public and private keys*/
+      // [S][T][R][E][A][M][I][N][G] [K][E][Y][S]
 
-      // connect to file for public key
+      // connect to files for streaming keys
       std::ofstream outPubKey("e_n.txt");
       std::ofstream outPrivKey("d_n.txt");
       
+      // if either stream fails, we opt to display both the console
       if (!outPubKey || !outPrivKey)
       {
          std::cerr << "\nError connecting to file for streaming of keys, displaying to console instead\n";
@@ -176,6 +173,7 @@ int main()
          return 0;
       }
 
+      // else, stream to files 'e_n.txt' and 'd_n.txt'
       outPubKey << e << std::endl 
                 << n << std::endl;
       outPubKey.close();
@@ -206,9 +204,10 @@ bool primality(const BigInteger &n)
    /* generating a random integer for a */
 
    // LOOP_COUNT_RAND is in [1, LOOP_COUNT]
-   // this ensures a is never greater than n because n was concatenated with 7 following its loop
+   // this ensures a is never greater than n (p and q) is concatenated one beyond its initalization loop
    const int LOOP_COUNT_RAND = rand() % (LOOP_COUNT) + 1;
    
+   // initialization loop for a 
    BigInteger a = BigInteger(0);
    for (int i = 0; i < LOOP_COUNT_RAND; ++i) 
    {
@@ -221,7 +220,7 @@ bool primality(const BigInteger &n)
       a = 1;
    }
 
-   // finally, do a check to ensure we have a valid integer that is not greater than n
+   // if a is found to be equal to, or greater than n, assign n - 1
    if (a >= n)
    {
       a = n - 1;
