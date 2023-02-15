@@ -5,7 +5,7 @@ Project description [here](https://www.cs.uakron.edu/~duan/classes/435/projects/
 
 For this project, the only files that have been edited by me are 'rsa435.cc' and 'messageDigest435.cpp'.
 I assume that the bigInt435 package containing my rsa435.cc, and the messageDigest435 package containing my messageDigest435.cpp
-are adjacent directories.
+are adjacent directories, although I will not submit these packages alongside my files.
 
 execution:
 
