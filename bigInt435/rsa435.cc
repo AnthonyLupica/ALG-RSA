@@ -182,7 +182,7 @@ int main()
                  << n << std::endl;
       outPrivKey.close();
 
-      std::cout << "public and private key written to written \"e_n.txt\" and \"d_n.txt\" respectively\n";
+      std::cout << "public and private key written to \"e_n.txt\" and \"d_n.txt\" respectively\n";
 	} 
    
    catch(char const* err) 
